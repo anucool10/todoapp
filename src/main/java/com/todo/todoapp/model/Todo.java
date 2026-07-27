@@ -1,6 +1,10 @@
 package com.todo.todoapp.model;
 
 
+import java.time.LocalDateTime;
+
+import org.hibernate.annotations.CreationTimestamp;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -15,16 +19,25 @@ public class Todo {
 	@NotBlank(message="task name should not be blank")
 	private String title;
 	private boolean completed;
+	@CreationTimestamp
+	private LocalDateTime timestamp;
 	
 	public Todo() {
 		// TODO Auto-generated constructor stub
 	}
-	public Todo(Long id, String title, boolean completed) {
+	public Todo(Long id, String title, boolean completed,LocalDateTime timestamp) {
 		this.id = id;
 		this.title = title;
 		this.completed = completed;
+		this.timestamp = timestamp;
 	}
 	
+	public LocalDateTime getTimestamp() {
+		return timestamp;
+	}
+	public void setTimestamp(LocalDateTime timestamp) {
+		this.timestamp = timestamp;
+	}
 	public Long getId() {
 		return id;
 	}
