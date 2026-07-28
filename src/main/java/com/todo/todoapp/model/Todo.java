@@ -1,9 +1,13 @@
 package com.todo.todoapp.model;
 
 
+import java.sql.Date;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -21,17 +25,27 @@ public class Todo {
 	private boolean completed;
 	@CreationTimestamp
 	private LocalDateTime timestamp;
+	@JsonFormat(pattern = "yyyy-MM-dd")
+	private LocalDate duedate;
+	
 	
 	public Todo() {
 		// TODO Auto-generated constructor stub
 	}
-	public Todo(Long id, String title, boolean completed,LocalDateTime timestamp) {
+	public Todo(Long id, String title, boolean completed,LocalDateTime timestamp, LocalDate duedate) {
 		this.id = id;
 		this.title = title;
 		this.completed = completed;
 		this.timestamp = timestamp;
+		this.duedate = duedate;
 	}
 	
+	public LocalDate getDuedate() {
+		return duedate;
+	}
+	public void setDuedate(LocalDate duedate) {
+		this.duedate = duedate;
+	}
 	public LocalDateTime getTimestamp() {
 		return timestamp;
 	}

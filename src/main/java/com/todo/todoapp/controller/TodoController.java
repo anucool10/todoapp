@@ -16,8 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.todo.todoapp.model.Todo;
 import com.todo.todoapp.repository.TodoRepository;
 import com.todo.todoapp.service.TodoService;
-import java.util.Optional;
-
 import jakarta.validation.Valid;
 
 @RestController
