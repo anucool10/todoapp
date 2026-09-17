@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -21,11 +22,12 @@ import jakarta.validation.Valid;
 @RestController
 @RequestMapping("/todo")
 @Validated
+@CrossOrigin(origins = "http://127.0.0.1:5500")
 public class TodoController {
 	@Autowired
 	private TodoService todoService;
 	@Autowired
-	private final TodoRepository todoRepository;
+	private TodoRepository todoRepository;
 	
 	public TodoController( TodoService todoService, TodoRepository todoRepository) {
         this.todoRepository = todoRepository;
