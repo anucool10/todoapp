@@ -181,15 +181,34 @@
                     list.innerHTML = ''; // Clear current list
                     
                     data.forEach(todo => {
+						console.log("Todo item:", todo);
+						    console.log("Timestamp value:", todo.timestamp);
                         const li = document.createElement('li');
+						
+						// --- 1. FORMAT THE TIMESTAMP ---
+						let timeString = '';
+						    if (todo.timestamp) {
+						                    // Spring Boot sends LocalDateTime either as an array [YYYY, MM, DD, HH, mm, ss] or a string
+						        if (Array.isArray(todo.timestamp)) {
+						            const [year, month, day, hour = 0, minute = 0] = todo.timestamp;
+						             timeString = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')} ${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+						        } else {
+						                        const date = new Date(todo.timestamp);
+						                        timeString = date.toLocaleString();
+						                    }
+						                }
+										
+										const displayTime = timeString ? `<small style="color: #95a5a6; margin-left: 8px;">(${timeString})</small>` : '';
+										    
+										    if (todo.completed) {
+										        li.innerHTML = `✔ ${todo.title} ${displayTime}`;
+										        li.style.color = '#7f8c8d';
+										    } else {
+										        li.innerHTML = `${todo.title} ${displayTime}`;
+										    }
 
-                        // Display text with checkmark if completed
-                        if (todo.completed) {
-                            li.textContent = '✔ ' + todo.title;
-                            li.style.color = '#7f8c8d';
-                        } else {
-                            li.textContent = todo.title;
-                        }
+
+                      
 
                         // Create a wrapper div for buttons to keep layout clean
                         const btnGroup = document.createElement('div');
