@@ -1,5 +1,6 @@
 package com.todo.todoapp.controller;
 
+import java.security.PublicKey;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,6 +55,14 @@ public class TodoController {
 		        .orElseThrow(() -> new RuntimeException("Todo not found"));
 		todo.setCompleted(!todo.getCompleted());
 		return todoRepository.save(todo);
+	}
+	@PatchMapping("/{id}/edit")
+	public Todo editTodo(@PathVariable Long id, @RequestBody Todo updatedTodo) {
+		Todo todo = todoRepository.findById(id)
+				.orElseThrow(()->new RuntimeException("Todo not found"));
+		todo.setTitle(updatedTodo.getTitle());
+		return todoRepository.save(todo);
+		
 	}
 
 }

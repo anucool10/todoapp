@@ -107,6 +107,9 @@
         .delete-btn:hover {
             background-color: #c0392b;
         }
+		.edit-btn{
+			background-color: grey;
+		}
 
         /* Modal Overlay */
         .modal-overlay {
@@ -171,6 +174,7 @@
         const postUrl = 'http://localhost:8080/todo/add';
         const deleteUrl = 'http://localhost:8080/todo/{id}';
         const toggleUrl = 'http://localhost:8080/todo/{id}/toggle';
+		const editUrl = 'http://localhost:8080/todo/{id}/edit';
 
         // 1. Fetch and display existing todos on load
         function loadTodos() {
@@ -232,6 +236,34 @@
                             })
                             .catch(error => console.error('Error toggling todo:', error));
                         });
+						
+						//edit button
+						const editButton = document.createElement('button');
+						editButton.className = 'edit-btn';
+						editButton.textContent = 'Edit';
+						
+						editButton.addEventListener('click', function(){
+								const newTitle = prompt("Edit your todo title:", todo.title);
+								
+								if (newTitle && newTitle.trim() !== "") {
+									fetch(editUrl.replace('{id}',todo.id),{
+										method: 'PATCH',
+										headers: { 'Content-Type': 'application/json' },
+										body: JSON.stringify({ title: newTitle })
+									})
+									.then(response => {
+										if (response.ok) {
+											loadTodos();
+										}else{
+											console.error("Failed to edit todo");
+										}
+									})
+									.catch(error => console.error('Error editing todo:', error));
+								}
+						});
+								
+								
+						
 
                         // --- DELETE BUTTON ---
                         const deleteButton = document.createElement('button');
@@ -257,6 +289,7 @@
 
                         // Append buttons to button group, then group to li, then li to list
                         btnGroup.appendChild(toggleButton);
+						btnGroup.appendChild(editButton);
                         btnGroup.appendChild(deleteButton);
                         li.appendChild(btnGroup);
                         list.appendChild(li);
