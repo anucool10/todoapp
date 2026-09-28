@@ -25,17 +25,20 @@
             margin-bottom: 25px;
         }
 
-        input[type="text"] {
+        input[type="text"], input[type="date"] {
             padding: 10px 14px;
             font-size: 16px;
             border: 1px solid #ccc;
             border-radius: 6px;
-            width: 280px;
             outline: none;
             transition: border-color 0.2s;
         }
 
-        input[type="text"]:focus {
+        input[type="text"] {
+            width: 280px;
+        }
+
+        input[type="text"]:focus, input[type="date"]:focus {
             border-color: #3498db;
         }
 
@@ -59,7 +62,7 @@
         ul {
             list-style-type: none;
             padding: 0;
-            width: 400px;
+            width: 480px;
         }
 
         li {
@@ -100,6 +103,14 @@
             background-color: #27ae60;
         }
 
+        /* Edit button styling */
+        .edit-btn {
+            background-color: #f39c12;
+        }
+        .edit-btn:hover {
+            background-color: #d68910;
+        }
+
         /* Delete button styling */
         .delete-btn {
             background-color: #e74c3c;
@@ -107,9 +118,6 @@
         .delete-btn:hover {
             background-color: #c0392b;
         }
-		.edit-btn{
-			background-color: grey;
-		}
 
         /* Modal Overlay */
         .modal-overlay {
@@ -118,7 +126,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.5); /* Dim the background */
+            background-color: rgba(0, 0, 0, 0.5);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -151,6 +159,7 @@
 </head>
 <body>
     <h1>My Todo List</h1>
+
     <div id="custom-modal" class="modal-overlay" style="display: none;">
         <div class="modal-box">
             <p>Are you sure you want to delete this todo?</p>
@@ -164,6 +173,7 @@
     <!-- Form to add a new todo -->
     <form id="todo-form">
         <input type="text" id="todo-input" placeholder="Enter a new todo task..." required>
+        <input type="date" id="duedate-input">
         <button type="submit">Add Todo</button>
     </form>
 
@@ -174,7 +184,35 @@
         const postUrl = 'http://localhost:8080/todo/add';
         const deleteUrl = 'http://localhost:8080/todo/{id}';
         const toggleUrl = 'http://localhost:8080/todo/{id}/toggle';
-		const editUrl = 'http://localhost:8080/todo/{id}/edit';
+        const editUrl = 'http://localhost:8080/todo/{id}/edit';
+
+        // Helper function to format dates as DD/MM/YY (with optional time)
+        function formatCustomDate(input, includeTime = false) {
+            if (!input) return '';
+            let year, month, day, hour = 0, minute = 0;
+
+            if (Array.isArray(input)) {
+                [year, month, day, hour = 0, minute = 0] = input;
+            } else {
+                const date = new Date(input);
+                year = date.getFullYear();
+                month = date.getMonth() + 1;
+                day = date.getDate();
+                hour = date.getHours();
+                minute = date.getMinutes();
+            }
+
+            const dd = String(day).padStart(2, '0');
+            const mm = String(month).padStart(2, '0');
+            const yy = String(year).slice(-2);
+
+            if (includeTime) {
+                const hh = String(hour).padStart(2, '0');
+                const min = String(minute).padStart(2, '0');
+                return `${dd}/${mm}/${yy} ${hh}:${min}`;
+            }
+            return `${dd}/${mm}/${yy}`;
+        }
 
         // 1. Fetch and display existing todos on load
         function loadTodos() {
@@ -182,90 +220,67 @@
                 .then(response => response.json())
                 .then(data => {
                     const list = document.getElementById('todo-list');
-                    list.innerHTML = ''; // Clear current list
+                    list.innerHTML = '';
                     
                     data.forEach(todo => {
-						console.log("Todo item:", todo);
-						    console.log("Timestamp value:", todo.timestamp);
                         const li = document.createElement('li');
-						
-						// --- 1. FORMAT THE TIMESTAMP ---
-						let timeString = '';
-						    if (todo.timestamp) {
-						                    // Spring Boot sends LocalDateTime either as an array [YYYY, MM, DD, HH, mm, ss] or a string
-						        if (Array.isArray(todo.timestamp)) {
-						            const [year, month, day, hour = 0, minute = 0] = todo.timestamp;
-						             timeString = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')} ${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
-						        } else {
-						                        const date = new Date(todo.timestamp);
-						                        timeString = date.toLocaleString();
-						                    }
-						                }
-										
-										const displayTime = timeString ? `<small style="color: #95a5a6; margin-left: 8px;">(${timeString})</small>` : '';
-										    
-										    if (todo.completed) {
-										        li.innerHTML = `✔ ${todo.title} ${displayTime}`;
-										        li.style.color = '#7f8c8d';
-										    } else {
-										        li.innerHTML = `${todo.title} ${displayTime}`;
-										    }
 
+                        // Format Timestamp & Due Date using DD/MM/YY format
+                        const timeString = formatCustomDate(todo.timestamp, true);
+                        const dueDateString = formatCustomDate(todo.duedate, false);
 
-                      
+                        const displayTime = timeString ? `<small style="color: #95a5a6; margin-left: 6px;">(${timeString})</small>` : '';
+                        const displayDueDate = dueDateString ? `<small style="color: #e67e22; margin-left: 6px;">Due: ${dueDateString}</small>` : '';
 
-                        // Create a wrapper div for buttons to keep layout clean
+                        // Combine into list item
+                        if (todo.completed) {
+                            li.innerHTML = `✔ ${todo.title} ${displayTime} ${displayDueDate}`;
+                            li.style.color = '#7f8c8d';
+                        } else {
+                            li.innerHTML = `${todo.title} ${displayTime} ${displayDueDate}`;
+                        }
+
+                        // Wrapper div for action buttons
                         const btnGroup = document.createElement('div');
                         btnGroup.className = 'btn-group';
 
-                        // --- TOGGLE BUTTON ---
+                        // Toggle Button
                         const toggleButton = document.createElement('button');
                         toggleButton.className = 'toggle-btn';
                         toggleButton.textContent = todo.completed ? 'Undo' : 'Complete';
                         
                         toggleButton.addEventListener('click', function() {
-                            fetch(toggleUrl.replace('{id}', todo.id), {
-                                method: 'PATCH'
-                            })
+                            fetch(toggleUrl.replace('{id}', todo.id), { method: 'PATCH' })
                             .then(response => {
-                                if (response.ok) {
-                                    loadTodos();
-                                } else {
-                                    console.error('Failed to toggle todo');
-                                }
+                                if (response.ok) loadTodos();
+                                else console.error('Failed to toggle todo');
                             })
                             .catch(error => console.error('Error toggling todo:', error));
                         });
-						
-						//edit button
-						const editButton = document.createElement('button');
-						editButton.className = 'edit-btn';
-						editButton.textContent = 'Edit';
-						
-						editButton.addEventListener('click', function(){
-								const newTitle = prompt("Edit your todo title:", todo.title);
-								
-								if (newTitle && newTitle.trim() !== "") {
-									fetch(editUrl.replace('{id}',todo.id),{
-										method: 'PATCH',
-										headers: { 'Content-Type': 'application/json' },
-										body: JSON.stringify({ title: newTitle })
-									})
-									.then(response => {
-										if (response.ok) {
-											loadTodos();
-										}else{
-											console.error("Failed to edit todo");
-										}
-									})
-									.catch(error => console.error('Error editing todo:', error));
-								}
-						});
-								
-								
-						
+                        
+                        // Edit Button
+                        const editButton = document.createElement('button');
+                        editButton.className = 'edit-btn';
+                        editButton.textContent = 'Edit';
+                        
+                        editButton.addEventListener('click', function() {
+                            const newTitle = prompt("Edit your todo title:", todo.title);
+                            
+                            if (newTitle && newTitle.trim() !== "") {
+                                fetch(editUrl.replace('{id}', todo.id), {
+                                    method: 'PATCH',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ title: newTitle })
+                                })
+                                .then(response => {
+                                    if (response.ok) loadTodos();
+                                    else console.error("Failed to edit todo");
+                                })
+                                .catch(error => console.error('Error editing todo:', error));
+                            }
+                        });
 
-                        // --- DELETE BUTTON ---
+                        // Delete Button
                         const deleteButton = document.createElement('button');
                         deleteButton.className = 'delete-btn';
                         deleteButton.textContent = 'Delete';    
@@ -273,23 +288,18 @@
                         deleteButton.addEventListener('click', async function() {
                             const confirmed = await showConfirmModal();
                             if (confirmed) {
-                                fetch(deleteUrl.replace('{id}', todo.id), {
-                                    method: 'DELETE'
-                                })
+                                fetch(deleteUrl.replace('{id}', todo.id), { method: 'DELETE' })
                                 .then(response => {
-                                    if (response.ok) {
-                                        loadTodos();
-                                    } else {
-                                        console.error('Failed to delete todo');
-                                    }
+                                    if (response.ok) loadTodos();
+                                    else console.error('Failed to delete todo');
                                 })
                                 .catch(error => console.error('Error deleting todo:', error));
                             }
                         });
 
-                        // Append buttons to button group, then group to li, then li to list
+                        // Append elements
                         btnGroup.appendChild(toggleButton);
-						btnGroup.appendChild(editButton);
+                        btnGroup.appendChild(editButton);
                         btnGroup.appendChild(deleteButton);
                         li.appendChild(btnGroup);
                         list.appendChild(li);
@@ -302,7 +312,12 @@
         document.getElementById('todo-form').addEventListener('submit', function(e) {
             e.preventDefault();
             const inputField = document.getElementById('todo-input');
-            const singleTodo = { title: inputField.value };
+            const duedateInput = document.getElementById('duedate-input');
+            
+            const singleTodo = { 
+                title: inputField.value,
+                duedate: duedateInput.value ? duedateInput.value : null 
+            };
             const payload = [singleTodo];
 
             fetch(postUrl, {
@@ -313,6 +328,7 @@
             .then(response => {
                 if (response.ok) {
                     inputField.value = '';
+                    duedateInput.value = '';
                     loadTodos();
                 } else {
                     console.error('Failed to create todo');
@@ -323,16 +339,16 @@
 
         // Initial load
         loadTodos();
-        // Helper function to show a custom center modal and return a Promise (true/false)
+
+        // Helper function for delete confirmation modal
         function showConfirmModal() {
             return new Promise((resolve) => {
                 const modal = document.getElementById('custom-modal');
                 const yesBtn = document.getElementById('modal-yes');
                 const noBtn = document.getElementById('modal-no');
 
-                modal.style.display = 'flex'; // Show modal
+                modal.style.display = 'flex';
 
-                // Clean up event listeners so they don't stack up
                 function closeHandler(result) {
                     modal.style.display = 'none';
                     yesBtn.removeEventListener('click', onYes);
