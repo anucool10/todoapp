@@ -1,31 +1,62 @@
-# To-Do Application
+# Todo App
 
-A full-stack task management web application built with a **Spring Boot** REST API backend, **PostgreSQL** database, and a vanilla **HTML/CSS/JavaScript** frontend.
+A simple full-stack Todo application built with **Java and Spring Boot**, with a basic **HTML, CSS and JavaScript** frontend.
 
-## 🚀 Features
+The backend uses **Hibernate/JPA** to interact with a **PostgreSQL** database.
 
-- **Full CRUD Operations:** Create, read, update, and delete tasks seamlessly.
-- **Task Completion Toggle:** Mark tasks as complete or active with visual feedback.
-- **Inline Editing:** Modify existing task titles via an interactive prompt/modal workflow.
-- **Custom Due Dates & Timestamps:** Track creation timestamps and set optional due dates formatted cleanly as `DD/MM/YY`.
-- **Frontend Filtering:** Instantly toggle between **All**, **Active**, and **Completed** views.
-- **Confirmation Modals:** Custom confirmation dialogs for destructive actions like deleting tasks.
+## Technologies
 
-## 🛠️ Tech Stack
+* Java
+* Spring Boot
+* Hibernate / JPA
+* PostgreSQL
+* HTML
+* CSS
+* Vanilla JavaScript
+* Maven
+* Postman
 
-- **Backend:** Java, Spring Boot, Spring Data JPA / Hibernate
-- **Database:** PostgreSQL
-- **Frontend:** HTML5, CSS3, Vanilla JavaScript (Fetch API)
-- **Version Control:** Git
+## Features
 
-## 📂 Project Structure
+* Create multiple todos
+* View all todos
+* Edit todo titles
+* Mark todos as completed/incomplete
+* Delete todos
+* Set due dates
+* Automatic creation timestamps
+* Validation for empty todo titles
+
+## API Endpoints
+
+| Method | Endpoint            | Description             |
+| ------ | ------------------- | ----------------------- |
+| GET    | `/todo`             | Get all todos           |
+| POST   | `/todo/add`         | Create todos            |
+| PATCH  | `/todo/{id}/edit`   | Edit a todo             |
+| PATCH  | `/todo/{id}/toggle` | Toggle completed status |
+| DELETE | `/todo/{id}`        | Delete a todo           |
+
+## Frontend
+
+The frontend is built using basic **HTML, CSS and Vanilla JavaScript**. It communicates with the Spring Boot REST API to display and manage the todos.
+
+## Database
+
+The application uses **PostgreSQL** for storing todo data. Hibernate/JPA is used to manage the database interaction.
+
+## Running the Project
+
+1. Clone the repository.
+2. Create a PostgreSQL database.
+3. Configure the database details in `application.properties`.
+4. Run the Spring Boot application.
+5. Open the HTML frontend using a local server such as **VS Code Live Server**.
+
+The backend runs on:
 
 ```text
-todo-app/
-├── src/
-│   ├── main/
-│   │   ├── java/com/todo/todoapp/   # Spring Boot Controllers, Services, Repositories, Entities
-│   │   └── resources/
-│   │       └── application.properties # Database and server configuration
-└── static/
-    └── index.html                 # Standalone UI with embedded CSS and JavaScript logic
+http://localhost:8080
+```
+
+The API can also be tested using **Postman**.
